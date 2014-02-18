@@ -104,10 +104,16 @@ typedef enum {
 @property (nonatomic) BOOL returnAllDataFromAck;
 
 - (id) initWithDelegate:(id<SocketIODelegate>)delegate;
+
 - (void) connectToHost:(NSString *)host onPort:(NSInteger)port;
+
 - (void) connectToHost:(NSString *)host onPort:(NSInteger)port withParams:(NSDictionary *)params;
 - (void) connectToHost:(NSString *)host onPort:(NSInteger)port withParams:(NSDictionary *)params withNamespace:(NSString *)endpoint;
 - (void) connectToHost:(NSString *)host onPort:(NSInteger)port withParams:(NSDictionary *)params withNamespace:(NSString *)endpoint withConnectionTimeout: (NSTimeInterval) connectionTimeout;
+
+- (void) connectToHost:(NSString *)host onPort:(NSInteger)port withBearerToken:(NSString *)bearer;
+- (void) connectToHost:(NSString *)host onPort:(NSInteger)port withBearerToken:(NSString *)bearer withNamespace:(NSString *)endpoint;
+- (void) connectToHost:(NSString *)host onPort:(NSInteger)port withBearerToken:(NSString *)bearer withNamespace:(NSString *)endpoint withConnectionTimeout: (NSTimeInterval) connectionTimeout;
 
 - (void) disconnect;
 - (void) disconnectForced;

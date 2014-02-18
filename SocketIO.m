@@ -160,6 +160,59 @@ NSString* const SocketIOException = @"SocketIOException";
     }
 }
 
+- (void) connectToHost:(NSString *)host onPort:(NSInteger)port withBearerToken:(NSString *)bearer
+{
+    [self connectToHost:host onPort:port withBearerToken:bearer withNamespace:@"" withConnectionTimeout:defaultConnectionTimeout];
+}
+
+- (void) connectToHost:(NSString *)host onPort:(NSInteger)port withBearerToken:(NSString *)bearer withNamespace:(NSString *)endpoint
+{
+    [self connectToHost:host onPort:port withBearerToken:bearer withNamespace:endpoint withConnectionTimeout:defaultConnectionTimeout];
+}
+
+- (void) connectToHost:(NSString *)host onPort:(NSInteger)port withBearerToken:(NSString *)bearer withNamespace:(NSString *)endpoint withConnectionTimeout: (NSTimeInterval) connectionTimeout
+{
+    if (!_isConnected && !_isConnecting) {
+        _isConnecting = YES;
+        
+        _host = host;
+        _port = port;
+        _params = nil;
+        _endpoint = [endpoint copy];
+        
+        // create a query parameters string
+        NSMutableString *query = [[NSMutableString alloc] initWithString:@""];
+        
+        // do handshake via HTTP request
+        NSString *protocol = _useSecure ? @"https" : @"http";
+        NSString *port = _port ? [NSString stringWithFormat:@":%d", _port] : @"";
+        NSTimeInterval time = [[NSDate date] timeIntervalSince1970] * 1000;
+        NSString *handshakeUrl = [NSString stringWithFormat:kHandshakeURL, protocol, _host, port, kResourceName, time, query];
+        
+        DEBUGLOG(@"Connecting to socket with URL: %@", handshakeUrl);
+        query = nil;
+        
+        // make a request
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:handshakeUrl]
+                                                               cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData
+                                                           timeoutInterval:connectionTimeout];
+        
+        [request addValue:[NSString stringWithFormat:@"Bearer %@",bearer] forHTTPHeaderField:@"Authorization"];
+        
+        _handshake = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
+        [_handshake scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        [_handshake start];
+        
+        if (_handshake) {
+            _httpRequestData = [NSMutableData data];
+        }
+        else {
+            // connection failed
+            [self connection:_handshake didFailWithError:nil];
+        }
+    }
+}
+
 - (void) disconnect
 {
     if (_isConnected) {
