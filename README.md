@@ -7,19 +7,12 @@
    * [SocketRocket](https://github.com/square/SocketRocket)
   Look [here](https://github.com/square/SocketRocket#installing-ios) for further instructions how to use/install SocketRocket.
 
-  JSON serialization can be provided by SBJson (json-framework), JSONKit or by Foundation in OS X 10.7/iOS 5.0.  These are selected at runtime and introduce no source-level dependencies.
-   * [json-framework](https://github.com/stig/json-framework/) (optional)
-   * [JSONKit](https://github.com/johnezang/JSONKit/) (optional)
 
 ## Requirements
 
 As of version 0.4, this library requires at least OS X 10.7 or iOS 5.0.
+Because of this, we were able to remove the external JSON frameworks in v0.5 and only rely on iOS' own `NSJSONSerialization`.
 
-
-## Non-ARC version
-
-If you're old school - there's still the [non-ARC version](https://github.com/pkyeck/socket.IO-objc/tree/non-arc) for you.
-This version (the non-ARC one) is out-of-date and won't be maintained any further (at least not by me).
 
 ## Usage
 
@@ -86,7 +79,6 @@ All delegate methods are optional - you could implement the following
 
 ``` objective-c
 - (void) socketIODidConnect:(SocketIO *)socket;
-- (void) socketIODidDisconnect:(SocketIO *)socket; // deprecated
 - (void) socketIODidDisconnect:(SocketIO *)socket disconnectedWithError:(NSError *)error;
 - (void) socketIO:(SocketIO *)socket didReceiveMessage:(SocketIOPacket *)packet;
 - (void) socketIO:(SocketIO *)socket didReceiveJSON:(SocketIOPacket *)packet;
@@ -95,35 +87,50 @@ All delegate methods are optional - you could implement the following
 - (void) socketIO:(SocketIO *)socket onError:(NSError *)error;
 ```
 
-These two callbacks are deprecated - please don't use them anymore - they will
-be removed in upcoming releases:
+To process an incoming `message` or `event` just
 
 ``` objective-c
-- (void) socketIOHandshakeFailed:(SocketIO *)socket;
-- (void) socketIO:(SocketIO *)socket failedToConnectWithError:(NSError *)error;
-```
-
-To process an incoming Message just
-
-``` objective-c
+// message delegate
 - (void) socketIO:(SocketIO *)socket didReceiveMessage:(SocketIOPacket *)packet
 {
-    NSLog(@"didReceiveMessage() >>> data: %@", packet.data);
+    NSLog(@"didReceiveMessage >>> data: %@", packet.data);
 }
+
+// event delegate
+- (void) socketIO:(SocketIO *)socket didReceiveEvent:(SocketIOPacket *)packet
+{
+    NSLog(@"didReceiveEvent >>> data: %@", packet.data);
+}
+```
+
+## Usage with OS X
+
+Running the socket.io-objc library with OS X requires some minor changes:
+
+- you have to use the SocketRocket.framework for OSX instead of just the submodule  
+see: [SocketRocket's Installing OS X](https://github.com/square/SocketRocket#installing-os-x)  
+(best way I got this to work was as a subproject and I didn't have to add the "copy file" stuff)
+
+- when using the osx-framework, you have to fix the import-statement in SocketIOTransportWebsocket.h
+
+``` objective-c
+// replace
+#import SRWebSocket.h
+
+// with
+#import <SocketRocket/SRWebSocket.h>
 ```
 	
 ## Authors
 
 Initial project by Philipp Kyeck <http://beta-interactive.de>.  
-Namespace support by Sam Lown <sam@cabify.com> at Cabify.  
-SSL support by kayleg <https://github.com/kayleg>.  
-Different Socket Libraries + Error Handling by taiyangc <https://github.com/taiyangc>.  
+Additional support from these [amazing people](https://github.com/pkyeck/socket.IO-objc/blob/master/CONTRIBUTORS.md).
 
 ## License
 
 (The MIT License)
 
-Copyright (c) 2011-13 Philipp Kyeck <http://beta-interactive.de>
+Copyright (c) 2011-14 Philipp Kyeck <http://beta-interactive.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
