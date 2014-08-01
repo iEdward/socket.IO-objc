@@ -319,7 +319,11 @@ NSString* const SocketIOException = @"SocketIOException";
             // do not require arguments
             if (data != nil)
             {
-                [array addObject:data];
+                if ([data isKindOfClass:[NSArray class]]) {
+                    [array addObjectsFromArray:data];
+                }else {
+                    [array addObject:data];
+                }
             }
             packet.data = [SocketIOJSONSerialization JSONStringFromObject:array error:nil];
             //packet.data = [packet.data stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
