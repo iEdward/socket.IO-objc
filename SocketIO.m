@@ -804,8 +804,23 @@ NSString* const SocketIOException = @"SocketIOException";
                                 
                             }
                         }    break;
-                        case 3:
-                            //Ack
+                        case 3:{
+                            DEBUGLOG(@"ack");
+                            NSUInteger rendpoint = [data rangeOfString:@"["].location;
+                            if (data.length > rendpoint) {
+                                NSString *ackId = [[data substringFromIndex:2] substringToIndex:rendpoint - 2];
+                                SocketIOCallback callbackFunction = [_acks objectForKey:ackId];
+                                
+                                NSString *argsStr = packet.data;
+                                id argsData = nil;
+                                argsData = [SocketIOJSONSerialization objectFromJSONData:[argsStr dataUsingEncoding:NSUTF8StringEncoding] error:nil];
+                                
+                                if (callbackFunction != nil) {
+                                    callbackFunction(argsData);
+                                    [self removeAcknowledgeForKey:ackId];
+                                }
+                            }
+                        }
                             break;
                         case 4:
                             //Error
