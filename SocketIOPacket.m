@@ -80,10 +80,10 @@
     NSMutableArray *encoded = [NSMutableArray arrayWithObject:[self typeAsNumber]];
     
     NSString *pIdL = self.pId != nil ? self.pId : @"";
-    if ([self.ack isEqualToString:@"data"])
-    {
-        pIdL = [pIdL stringByAppendingString:@"+"];
-    }
+//    if ([self.ack isEqualToString:@"data"])
+//    {
+//        pIdL = [pIdL stringByAppendingString:@"+"];
+//    }
     
     // Do not write pid for acknowledgements
     if ([type intValue] != 6) {
